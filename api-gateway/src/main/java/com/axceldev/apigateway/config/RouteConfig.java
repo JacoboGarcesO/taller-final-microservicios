@@ -11,14 +11,16 @@ public class RouteConfig {
     @Bean
     public RouteLocator createRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
+                .route("authentication-service-route", r -> r.path("/api/auth/**")
+                        .uri("http://localhost:3001"))
                 .route("banks-service-route", r -> r.path("/api/banks/**")
-                        .uri("http://localhost:8081"))
+                        .uri("http://localhost:3002"))
                 .route("accounts-service-route", r -> r.path("/api/accounts/**")
-                        .uri("http://localhost:8082"))
+                        .uri("http://localhost:3003"))
                 .route("transactions-service-route", r -> r.path("/api/transactions/**")
-                        .uri("http://localhost:8083"))
+                        .uri("http://localhost:3004"))
                 .route("transfers-service-route", r -> r.path("/api/transfers/**")
-                        .uri("http://localhost:8084"))
+                        .uri("http://localhost:3005"))
                 .build();
     }
 }
