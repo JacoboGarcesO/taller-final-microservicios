@@ -22,7 +22,7 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 
 ### 3. Servicio de Cuentas
 - Gestión de cuentas bancarias (creación, consulta, modificación)
-- Conección con microservicio de bancos para validar que el banco en el que se está tratando de crear la cuenta sí exista (usando peticiones REST).
+- Conexión con microservicio de bancos para validar que el banco en el que se está tratando de crear la cuenta sí exista (usando peticiones REST).
 - Historial de movimientos que se obtienen a través de una consulta al módulo de transacciones (usando gRPC).
 - Exposición de API REST para operaciones CRUD de cuentas
 
