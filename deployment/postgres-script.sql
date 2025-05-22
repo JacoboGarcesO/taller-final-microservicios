@@ -15,9 +15,7 @@ CREATE TABLE IF NOT EXISTS sch_transaction.transactions (
     transaction_type VARCHAR(50) NOT NULL,
     amount DOUBLE PRECISION NOT NULL,
     currency VARCHAR(10) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    description VARCHAR(255),
-    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS sch_account.accounts (
@@ -34,6 +32,7 @@ CREATE TABLE IF NOT EXISTS sch_transfer.transfers (
     source_account_number VARCHAR(100) NOT NULL,
     destination_account_number VARCHAR(100) NOT NULL,
     amount DOUBLE PRECISION NOT NULL,
+    tax DOUBLE PRECISION NOT NULL,
     currency VARCHAR(10) NOT NULL,
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL,

@@ -1,4 +1,4 @@
-package com.axceldev.transactionservice.model;
+package com.axceldev.transferservice.model;
 
 public enum TransactionType {
     DEPOSIT,

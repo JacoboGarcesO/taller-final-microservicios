@@ -17,7 +17,5 @@ public class Transaction {
     private TransactionType transactionType;
     private Double amount;
     private Currency currency;
-    private TransactionStatus status;
-    private String description;
-    private LocalDateTime timestamp;
+    private LocalDateTime createdAt;
 }

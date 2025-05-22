@@ -9,15 +9,13 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder(toBuilder = true)
-@Table(name = "transfers")
-public class Transfer {
+@Table(name = "transactions")
+public class Transaction {
     @Id
-    private Long TransferId;
-    private String sourceAccountNumber;
-    private String destinationAccountNumber;
+    private Long transactionId;
+    private String accountNumber;
+    private TransactionType transactionType;
     private Double amount;
     private Currency currency;
-    private TransferStatus status;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
