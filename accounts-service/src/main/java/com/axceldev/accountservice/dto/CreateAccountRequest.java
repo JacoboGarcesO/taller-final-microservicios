@@ -4,4 +4,4 @@ import com.axceldev.accountservice.model.AccountType;
 import com.axceldev.accountservice.model.Currency;
 
 public record CreateAccountRequest(String accountNumber, AccountType accountType,
-                                   Currency currency, Double balance, Long bankId) { }
+                                   Currency currency, Long bankId) { }

@@ -2,6 +2,7 @@ package com.axceldev.transactionservice.model;
 
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @Table(name = "transactions")
 public class Transaction {
-    private Long id;
+    @Id
+    private Long transactionId;
     private String accountNumber;
     private TransactionType transactionType;
     private Double amount;
