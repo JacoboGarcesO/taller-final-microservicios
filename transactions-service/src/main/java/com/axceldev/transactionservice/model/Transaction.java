@@ -1,0 +1,21 @@
+package com.axceldev.transactionservice.model;
+
+import lombok.Builder;
+import lombok.Data;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder(toBuilder = true)
+@Table(name = "transactions")
+public class Transaction {
+    private Long id;
+    private String accountNumber;
+    private TransactionType transactionType;
+    private Double amount;
+    private Currency currency;
+    private TransactionStatus status;
+    private String description;
+    private LocalDateTime timestamp;
+}

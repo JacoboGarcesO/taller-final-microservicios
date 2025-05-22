@@ -35,3 +35,15 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Listener de transferencias que procesará las transferencias interbancarias añadiendo un impuesto y guardando la transacción en la base de datos de transacciones.
 
 ### 5. Cobertura de pruebas igual o superior al 80%
+
+### DATA
+
+DB_HOST=localhost;
+DB_PORT=5432;
+DB_NAME=financedb;
+DB_USER=postgres;
+DB_PASSWORD=gqNFG_n2dWDcL5_;
+DB_SCHEMA=sch_bank
+DB_SCHEMA=sch_account
+DB_SCHEMA=sch_transaction
+DB_SCHEMA=sch_transfer
