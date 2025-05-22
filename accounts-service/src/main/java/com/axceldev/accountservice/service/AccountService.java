@@ -1,9 +1,10 @@
 package com.axceldev.accountservice.service;
 
-import com.axceldev.accountservice.dto.AccountNumberBankIdResponse;
-import com.axceldev.accountservice.dto.CreateAccountRequest;
-import com.axceldev.accountservice.dto.HasSufficientFundsRequest;
+import com.axceldev.accountservice.dto.*;
+import com.axceldev.accountservice.grpc.TransactionConsumer;
+import com.axceldev.accountservice.grpc.TransactionHistoryResponse;
 import com.axceldev.accountservice.model.Account;
+import com.axceldev.accountservice.model.TransactionType;
 import com.axceldev.accountservice.repository.IAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +21,7 @@ public class AccountService {
 
     private final IAccountRepository accountRepository;
     private final WebClient webClient;
+    private final TransactionConsumer transactionConsumer;
 
 
     public Mono<Account> createAccount(CreateAccountRequest request){
@@ -32,6 +35,45 @@ public class AccountService {
                         Mono.error(new RuntimeException("Error creating account", throwable))
                 ).switchIfEmpty(Mono.error(new RuntimeException("Bank not found")));
     }
+
+    public Mono<Boolean> updateBalance(UpdateBalanceRequest request) {
+        return accountRepository.findByAccountNumber(request.accountNumber())
+                .flatMap(account -> {
+                    account.setBalance(newBalance(request, account));
+                    return accountRepository.save(account)
+                            .map(savedAccount -> true);
+                })
+                .switchIfEmpty(Mono.just(false));
+    }
+
+    private double newBalance(UpdateBalanceRequest request, Account account) {
+        if (request.transactionType() == TransactionType.WITHDRAWAL) {
+            return account.getBalance() - request.amount();
+        } else if (request.transactionType() == TransactionType.DEPOSIT) {
+            return account.getBalance() + request.amount();
+        }
+        return account.getBalance();
+    }
+
+    public Mono<List<TransactionsHistoryResponse>> getTransactionHistory(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber)
+                .switchIfEmpty(Mono.error(new RuntimeException("Cuenta no encontrada")))
+                .map(account -> getTransactionHistoryFromGrpc(accountNumber));
+    }
+
+    private List<TransactionsHistoryResponse> getTransactionHistoryFromGrpc(String accountNumber) {
+        TransactionHistoryResponse grpcResponse = transactionConsumer.getTransactionHistory(accountNumber);
+        return grpcResponse.getTransactionsList().stream()
+                .map(transaction -> TransactionsHistoryResponse.builder()
+                        .accountNumber(transaction.getAccountNumber())
+                        .transactionType(transaction.getTransactionType())
+                        .amount(transaction.getAmount())
+                        .currency(transaction.getCurrency())
+                        .createdAt(transaction.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 
 
     public Flux<AccountNumberBankIdResponse> findByAccountNumbers(List<String> accountNumbers) {

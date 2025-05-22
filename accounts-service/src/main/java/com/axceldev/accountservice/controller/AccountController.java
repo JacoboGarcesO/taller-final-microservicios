@@ -1,8 +1,6 @@
 package com.axceldev.accountservice.controller;
 
-import com.axceldev.accountservice.dto.AccountNumberBankIdResponse;
-import com.axceldev.accountservice.dto.CreateAccountRequest;
-import com.axceldev.accountservice.dto.HasSufficientFundsRequest;
+import com.axceldev.accountservice.dto.*;
 import com.axceldev.accountservice.model.Account;
 import com.axceldev.accountservice.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +46,25 @@ public class AccountController {
                 })
                 .onErrorResume(throwable -> Mono.just(false));
     }
+
+    @GetMapping("/transaction-history")
+    public Mono<List<TransactionsHistoryResponse>> getTransactionHistory(@RequestParam String accountNumber) {
+        return accountService.getTransactionHistory(accountNumber)
+                .doOnError(throwable -> {
+                    throw new RuntimeException("Error fetching transaction history", throwable);
+                })
+                .onErrorResume(throwable -> Mono.empty());
+    }
+
+    @PostMapping("/update-balance")
+    public Mono<Boolean> updateBalance(@RequestBody UpdateBalanceRequest request) {
+        return accountService.updateBalance(request)
+                .doOnError(throwable -> {
+                    throw new RuntimeException("Error updating balance", throwable);
+                })
+                .onErrorResume(throwable -> Mono.empty());
+    }
+
+
 
 }

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_package = "com.axceldev.transactionservice.grpc";
+option java_multiple_files = true;
+option java_outer_classname = "TransactionProto";
+
+package transaction;
+
+service TransactionService {
+  rpc GetTransactionHistory (TransactionHistoryRequest) returns (TransactionHistoryResponse);
+}
+
+message TransactionHistoryRequest {
+  string accountNumber = 1;
+}
+
+message Transaction {
+  int64 transactionId = 1;
+  string accountNumber = 2;
+  double amount = 3;
+  string currency = 4;
+  string transactionType = 5;
+  string createdAt = 6;
+}
+
+message TransactionHistoryResponse {
+  repeated Transaction transactions = 1;
+}

@@ -3,6 +3,7 @@ package com.axceldev.transactionservice.service;
 import com.axceldev.transactionservice.dto.BankCheckResponse;
 import com.axceldev.transactionservice.dto.CreateTransactionRequest;
 import com.axceldev.transactionservice.dto.TransactionMessageDto;
+import com.axceldev.transactionservice.dto.UpdateBalanceRequest;
 import com.axceldev.transactionservice.model.Transaction;
 import com.axceldev.transactionservice.model.TransactionType;
 import com.axceldev.transactionservice.repository.ITransactionRepository;
@@ -11,6 +12,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -58,21 +60,49 @@ public class TransactionService {
 
     private Mono<List<Transaction>> saveWithdrawalAndDeposit(CreateTransactionRequest request) {
 
-        Transaction withdrawal = Transaction.builder()
+        Transaction withdrawal = buildTransactionWithdrawal(request);
+        Transaction deposit = buildTransactionDeposit(request);
+
+        return transactionRepository.saveAll(List.of(withdrawal, deposit))
+                .collectList()
+                .flatMap(transactions -> updateBalance(transactions)
+                        .thenReturn(transactions));
+    }
+
+    private Transaction buildTransactionWithdrawal(CreateTransactionRequest request) {
+        return Transaction.builder()
                 .accountNumber(request.sourceAccountNumber())
                 .amount(-Math.abs(request.amount()))
                 .currency(request.currency())
                 .transactionType(TransactionType.WITHDRAWAL)
                 .build();
+    }
 
-        Transaction deposit = Transaction.builder()
+    private Transaction buildTransactionDeposit(CreateTransactionRequest request) {
+        return Transaction.builder()
                 .accountNumber(request.destinationAccountNumber())
                 .amount(Math.abs(request.amount()))
                 .currency(request.currency())
                 .transactionType(TransactionType.DEPOSIT)
                 .build();
+    }
 
-        return transactionRepository.saveAll(List.of(withdrawal, deposit)).collectList();
+    private Mono<Boolean> updateBalance(List<Transaction> transactions) {
+        return Flux.fromIterable(transactions)
+                .flatMap(transaction -> {
+                    UpdateBalanceRequest request = new UpdateBalanceRequest(
+                            transaction.getAccountNumber(),
+                            transaction.getAmount(),
+                            transaction.getTransactionType()
+                    );
+                    return webClient.put()
+                            .uri("/api/accounts/update-balance")
+                            .bodyValue(request)
+                            .retrieve()
+                            .bodyToMono(Boolean.class)
+                            .onErrorReturn(false);
+                })
+                .all(Boolean::booleanValue);
     }
 
     public Mono<Boolean> areAccountsFromSameBank(String sourceAccount, String destinationAccount) {
