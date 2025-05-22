@@ -2,6 +2,7 @@ package com.axceldev.transactionservice.service;
 
 import com.axceldev.transactionservice.dto.BankCheckResponse;
 import com.axceldev.transactionservice.dto.CreateTransactionRequest;
+import com.axceldev.transactionservice.dto.TransactionMessageDto;
 import com.axceldev.transactionservice.model.Transaction;
 import com.axceldev.transactionservice.model.TransactionType;
 import com.axceldev.transactionservice.repository.ITransactionRepository;
@@ -93,24 +94,33 @@ public class TransactionService {
         return hasSufficientFunds(request.sourceAccountNumber(), request.amount())
                 .filter(Boolean::booleanValue)
                 .flatMap(hasFunds -> {
-                    Transaction withdrawal = Transaction.builder()
-                            .accountNumber(request.sourceAccountNumber())
-                            .amount(request.amount())
-                            .currency(request.currency())
-                            .transactionType(TransactionType.WITHDRAWAL)
-                            .build();
-
-                    Transaction deposit = Transaction.builder()
-                            .accountNumber(request.destinationAccountNumber())
-                            .amount(request.amount())
-                            .currency(request.currency())
-                            .transactionType(TransactionType.DEPOSIT)
-                            .build();
-
+                    Transaction withdrawal = buildTransaction(request);
                     return transactionRepository.save(withdrawal)
-                            .doOnSuccess(tx -> rabbitTemplate.convertAndSend(transactionQueue, deposit))
+                            .doOnSuccess(tx -> sendDepositToQueue(request))
                             .then(Mono.just(List.of(withdrawal)));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Fondos insuficientes")));
+    }
+
+    private void sendDepositToQueue(CreateTransactionRequest request) {
+        rabbitTemplate.convertAndSend(transactionQueue, buildTransactionMessage(request));
+    }
+
+    private TransactionMessageDto buildTransactionMessage(CreateTransactionRequest request) {
+        return TransactionMessageDto.builder()
+                .accountNumber(request.destinationAccountNumber())
+                .transactionType(TransactionType.DEPOSIT)
+                .amount(request.amount())
+                .currency(request.currency())
+                .build();
+    }
+
+    private Transaction buildTransaction(CreateTransactionRequest request) {
+        return Transaction.builder()
+                .accountNumber(request.sourceAccountNumber())
+                .amount(-Math.abs(request.amount()))
+                .currency(request.currency())
+                .transactionType(TransactionType.WITHDRAWAL)
+                .build();
     }
 }

@@ -26,15 +26,3 @@ CREATE TABLE IF NOT EXISTS sch_account.accounts (
     balance DOUBLE PRECISION NOT NULL,
     bank_id BIGINT NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS sch_transfer.transfers (
-    transfer_id SERIAL PRIMARY KEY,
-    source_account_number VARCHAR(100) NOT NULL,
-    destination_account_number VARCHAR(100) NOT NULL,
-    amount DOUBLE PRECISION NOT NULL,
-    tax DOUBLE PRECISION NOT NULL,
-    currency VARCHAR(10) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
-);
