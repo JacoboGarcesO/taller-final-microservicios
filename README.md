@@ -27,7 +27,13 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Exposición de API REST para operaciones CRUD de cuentas
 
 ### 4. Servicio de Transacciones
-- Procesamiento de transferencias entre cuentas y bancos. Si la transferencia es entre cuentas del mismo banco, simplemente debe generarse una transacción de tipo retiro en la cuenta de la que se saca el dinero y otra transacción de tipo depósito en la cuenta a la que se ingresa el dinero. Si la transacción es interbancaria, debe generarse una transacción de tipo retiro en la cuenta de la que se saca el dinero y debe enviarse a una cola de mensajería una transacción de tipo depósito para la cuenta a la que se ingresará el dinero.
+- Procesamiento de transferencias entre cuentas y bancos. 
+- Simple
+Si la transferencia es entre cuentas del mismo banco, simplemente debe generarse una transacción de tipo retiro 
+en la cuenta de la que se saca el dinero y otra transacción de tipo depósito en la cuenta a la que se ingresa el dinero.
+- interbancaria
+Si la transacción es interbancaria, debe generarse una transacción de tipo retiro en la cuenta 
+de la que se saca el dinero y debe enviarse a una cola de mensajería una transacción de tipo depósito para la cuenta a la que se ingresará el dinero. 
 - Registro de depósitos y retiros
 - Validación de fondos suficientes
 
@@ -35,3 +41,14 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Listener de transferencias que procesará las transferencias interbancarias añadiendo un impuesto y guardando la transacción en la base de datos de transacciones.
 
 ### 5. Cobertura de pruebas igual o superior al 80%
+
+### Configuración
+
+1. Instalar Docker y Docker Compose
+
+2. docker-compose up -d al docker-compose.yml en la carpeta deployment
+
+3. configurara variables de entorno de los microservicios en el archivo .env-project de la carpeta deployment
+
+4. exportar en postman la colección de postman de la carpeta deployment
+   - importar el archivo Finance-Bank.postman_collection.json en postman
