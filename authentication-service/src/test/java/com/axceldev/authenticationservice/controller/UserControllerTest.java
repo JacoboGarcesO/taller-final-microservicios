@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 class UserControllerTest {
