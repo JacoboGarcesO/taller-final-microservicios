@@ -8,6 +8,8 @@ import com.axceldev.transactionservice.model.Transaction;
 import com.axceldev.transactionservice.model.TransactionType;
 import com.axceldev.transactionservice.repository.ITransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,11 +25,16 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Service
 public class TransactionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
+
     private final ITransactionRepository transactionRepository;
     private final WebClient webClient;
     private final RabbitTemplate rabbitTemplate;
-    @Value("${app.transaction.queue}")
-    private String transactionQueue;
+    @Value("${app.transaction.exchange}")
+    private String transactionExchange;
+    @Value("${app.transaction.routing-key}")
+    private String transactionRoutingKey;
 
     public Mono<List<Transaction>> createTransaction(CreateTransactionRequest request) {
         return areAccountsFromSameBank(request.sourceAccountNumber(), request.destinationAccountNumber())
@@ -133,16 +140,20 @@ public class TransactionService {
         return hasSufficientFunds(request.sourceAccountNumber(), request.amount())
                 .filter(Boolean::booleanValue)
                 .flatMap(hasFunds -> {
-                    Transaction withdrawal = buildTransaction(request);
+                    LocalDateTime now = LocalDateTime.now();
+                    Transaction withdrawal = buildTransactionWithdrawal(request, now);
+                    Transaction deposit = buildTransactionDeposit(request, now);
                     return transactionRepository.save(withdrawal)
+                            .flatMap(transaction -> updateBalance(List.of(transaction)))
                             .doOnSuccess(tx -> sendDepositToQueue(request))
-                            .then(Mono.just(List.of(withdrawal)));
+                            .then(Mono.just(List.of(withdrawal, deposit)));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Fondos insuficientes")));
     }
 
     private void sendDepositToQueue(CreateTransactionRequest request) {
-        rabbitTemplate.convertAndSend(transactionQueue, buildTransactionMessage(request));
+        logger.info(String.format("Sending deposit to queue: %s", request.toString()));
+        rabbitTemplate.convertAndSend(transactionExchange, transactionRoutingKey, buildTransactionMessage(request));
     }
 
     private TransactionMessageDto buildTransactionMessage(CreateTransactionRequest request) {
@@ -155,10 +166,12 @@ public class TransactionService {
     }
 
     private Transaction buildTransaction(CreateTransactionRequest request) {
+        LocalDateTime now = LocalDateTime.now();
         return Transaction.builder()
                 .accountNumber(request.sourceAccountNumber())
-                .amount(-Math.abs(request.amount()))
+                .amount(request.amount())
                 .currency(request.currency())
+                .createdAt(now)
                 .transactionType(TransactionType.WITHDRAWAL)
                 .build();
     }

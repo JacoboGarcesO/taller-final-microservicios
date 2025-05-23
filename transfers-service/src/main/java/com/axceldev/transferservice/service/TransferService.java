@@ -5,6 +5,8 @@ import com.axceldev.transferservice.dto.UpdateBalanceRequest;
 import com.axceldev.transferservice.model.Transaction;
 import com.axceldev.transferservice.repository.ITransferRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,24 +16,28 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class TransferService {
-    private final ITransferRepository transferRepository;
+    private static final Logger logger = LoggerFactory.getLogger(TransferService.class);
+    private final ITransferRepository transactionRepository;
     private final WebClient webClient;
     private static final double TAX_RATE = 0.01;
 
-    @RabbitListener(queues = "deposit-inter-bank-queue")
+    @RabbitListener(queues = {"${app.transaction.queue}"})
     public void receiveDeposit(TransactionMessageDto deposit) {
+
+        logger.info(String.format("Received deposit: %s", deposit.toString()));
 
         Transaction transactionWithTax = buildTransaction(deposit);
 
-        transferRepository.save(transactionWithTax)
+        transactionRepository.save(transactionWithTax)
                 .subscribe(
                         transaction -> {
                             System.out.println("Transaction saved: " + transaction);
                             webClient.post()
                                     .uri("/api/accounts/update-balance")
                                     .bodyValue(new UpdateBalanceRequest(
-                                            transaction.getAccountNumber(),
-                                            transaction.getAmount(), transaction.getTransactionType()
+                                            transactionWithTax.getAccountNumber(),
+                                            transactionWithTax.getAmount(),
+                                            transactionWithTax.getTransactionType()
                                     ))
                                     .retrieve()
                                     .bodyToMono(String.class)
@@ -50,7 +56,6 @@ public class TransferService {
                 .transactionType(deposit.getTransactionType())
                 .amount(finalAmount)
                 .currency(deposit.getCurrency())
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 }
