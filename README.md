@@ -42,14 +42,13 @@ de la que se saca el dinero y debe enviarse a una cola de mensajería una transa
 
 ### 5. Cobertura de pruebas igual o superior al 80%
 
-### DATA
+### Configuración
 
-DB_HOST=localhost;
-DB_PORT=5432;
-DB_NAME=financedb;
-DB_USER=postgres;
-DB_PASSWORD=gqNFG_n2dWDcL5_;
-DB_SCHEMA=sch_bank
-DB_SCHEMA=sch_account
-DB_SCHEMA=sch_transaction
-DB_SCHEMA=sch_transfer
+1. Instalar Docker y Docker Compose
+
+2. docker-compose up -d al docker-compose.yml en la carpeta deployment
+
+3. configurara variables de entorno de los microservicios en el archivo .env-project de la carpeta deployment
+
+4. exportar en postman la colección de postman de la carpeta deployment
+   - importar el archivo Finance-Bank.postman_collection.json en postman
