@@ -4,10 +4,6 @@ import com.axceldev.transactionservice.repository.ITransactionRepository;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
-import reactor.core.publisher.Flux;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @GrpcService
@@ -21,6 +17,7 @@ public class TransactionProvider extends TransactionServiceGrpc.TransactionServi
                 .map(trx -> Transaction.newBuilder()
                         .setTransactionId(trx.getTransactionId())
                         .setAccountNumber(trx.getAccountNumber())
+                        .setCurrency(trx.getCurrency().toString())
                         .setAmount(trx.getAmount())
                         .setCreatedAt(trx.getCreatedAt().toString())
                         .setTransactionType(trx.getTransactionType().toString())
@@ -34,7 +31,7 @@ public class TransactionProvider extends TransactionServiceGrpc.TransactionServi
                         responseObserver::onNext,
                         responseObserver::onError,
                         responseObserver::onCompleted
-                ).dispose();
+                );
     }
 
 }

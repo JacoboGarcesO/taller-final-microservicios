@@ -15,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,9 +61,9 @@ public class TransactionService {
     }
 
     private Mono<List<Transaction>> saveWithdrawalAndDeposit(CreateTransactionRequest request) {
-
-        Transaction withdrawal = buildTransactionWithdrawal(request);
-        Transaction deposit = buildTransactionDeposit(request);
+        LocalDateTime now = LocalDateTime.now();
+        Transaction withdrawal = buildTransactionWithdrawal(request, now);
+        Transaction deposit = buildTransactionDeposit(request, now);
 
         return transactionRepository.saveAll(List.of(withdrawal, deposit))
                 .collectList()
@@ -69,33 +71,36 @@ public class TransactionService {
                         .thenReturn(transactions));
     }
 
-    private Transaction buildTransactionWithdrawal(CreateTransactionRequest request) {
+    private Transaction buildTransactionWithdrawal(CreateTransactionRequest request, LocalDateTime currentDateTime) {
         return Transaction.builder()
                 .accountNumber(request.sourceAccountNumber())
-                .amount(-Math.abs(request.amount()))
+                .amount(request.amount())
                 .currency(request.currency())
                 .transactionType(TransactionType.WITHDRAWAL)
+                .createdAt(currentDateTime)
                 .build();
     }
 
-    private Transaction buildTransactionDeposit(CreateTransactionRequest request) {
+    private Transaction buildTransactionDeposit(CreateTransactionRequest request,  LocalDateTime currentDateTime) {
         return Transaction.builder()
                 .accountNumber(request.destinationAccountNumber())
-                .amount(Math.abs(request.amount()))
+                .amount(request.amount())
                 .currency(request.currency())
                 .transactionType(TransactionType.DEPOSIT)
+                .createdAt(currentDateTime)
                 .build();
     }
 
     private Mono<Boolean> updateBalance(List<Transaction> transactions) {
         return Flux.fromIterable(transactions)
+                .delayElements(Duration.ofMillis(500))
                 .flatMap(transaction -> {
                     UpdateBalanceRequest request = new UpdateBalanceRequest(
                             transaction.getAccountNumber(),
                             transaction.getAmount(),
                             transaction.getTransactionType()
                     );
-                    return webClient.put()
+                    return webClient.post()
                             .uri("/api/accounts/update-balance")
                             .bodyValue(request)
                             .retrieve()
@@ -106,9 +111,13 @@ public class TransactionService {
     }
 
     public Mono<Boolean> areAccountsFromSameBank(String sourceAccount, String destinationAccount) {
-        return webClient.post()
-                .uri("/api/accounts/batch")
-                .bodyValue(List.of(sourceAccount, destinationAccount))
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/accounts/batch")
+                        .queryParam("sourceAccountNumber", sourceAccount)
+                        .queryParam("destinationAccountNumber", destinationAccount)
+                        .build()
+                )
                 .retrieve()
                 .bodyToFlux(BankCheckResponse.class)
                 .collectList()

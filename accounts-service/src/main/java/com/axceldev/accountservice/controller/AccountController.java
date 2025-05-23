@@ -28,8 +28,12 @@ public class AccountController {
     }
 
     @GetMapping("/batch")
-    public ResponseEntity<Flux<AccountNumberBankIdResponse>> getAccountsByNumbers(@RequestBody List<String> accountNumbers) {
-        return ResponseEntity.ok(accountService.findByAccountNumbers(accountNumbers).doOnError(throwable -> {
+    public ResponseEntity<Flux<AccountNumberBankIdResponse>> getAccountsByNumbers(
+            @RequestParam String sourceAccountNumber,
+            @RequestParam String destinationAccountNumber) {
+        List<String> accountNumberList = List.of(sourceAccountNumber,destinationAccountNumber);
+        return ResponseEntity.ok(accountService.findByAccountNumbers(accountNumberList)
+                        .doOnError(throwable -> {
             throw new RuntimeException("Error fetching accounts", throwable);
         }).onErrorResume(throwable -> Flux.empty())
         );
