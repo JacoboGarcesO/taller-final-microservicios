@@ -8,14 +8,22 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Punto de entrada único para todas las peticiones de clientes
 - Enrutamiento de solicitudes a los microservicios correspondientes
 
+### 1. Servicio de autenticación
+- Registro de usuarios
+- Autenticación
+- Encriptación de contraseñas
+- Generación de tokens
+- Protección de rutas usando JWT
+- Los usuarios se deben almacenar en una base de datos MongoDB
+  
 ### 2. Servicio de Bancos
 - Gestión de Bancos (creación, consulta, modificación)
 - Exposición de API REST para operaciones CRUD de Bancos
 
 ### 3. Servicio de Cuentas
 - Gestión de cuentas bancarias (creación, consulta, modificación)
-- Conección con microservicio de bancos para validar que el banco en el que se está tratando de crear la cuenta sí exista.
-- Historial de movimientos que se obtienen a través de una consulta al módulo de transacciones.
+- Conección con microservicio de bancos para validar que el banco en el que se está tratando de crear la cuenta sí exista (usando peticiones REST).
+- Historial de movimientos que se obtienen a través de una consulta al módulo de transacciones (usando gRPC).
 - Exposición de API REST para operaciones CRUD de cuentas
 
 ### 4. Servicio de Transacciones
@@ -23,5 +31,7 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Registro de depósitos y retiros
 - Validación de fondos suficientes
 
-### 4. Servicio de Transferencias
+### 5. Servicio de Transferencias
 - Listener de transferencias que procesará las transferencias interbancarias añadiendo un impuesto y guardando la transacción en la base de datos de transacciones.
+
+### 5. Cobertura de pruebas igual o superior al 80%
