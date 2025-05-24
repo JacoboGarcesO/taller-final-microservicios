@@ -1,0 +1,8 @@
+rootProject.name = 'taller-final-microservicios'
+include 'banks-services'
+include 'accounts-service'
+include 'transactions-service'
+include 'transfers-service'
+include 'api-gateway'
+include 'api-gateway'
+
