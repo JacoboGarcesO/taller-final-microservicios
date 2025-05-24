@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS accounts (
+    account_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(30) NOT NULL,
+    number VARCHAR(30) NOT NULL UNIQUE,
+    bank_id BIGINT NOT NULL,
+    customer_id BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
