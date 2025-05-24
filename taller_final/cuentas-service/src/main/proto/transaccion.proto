@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.cuentasservice.grpc";
+option java_outer_classname = "TransaccionProto";
+
+service TransaccionService {
+  rpc GetHistorialPorCuenta (CuentaRequest) returns (HistorialResponse);
+}
+
+message CuentaRequest {
+  int64 cuenta = 1;
+}
+
+message Transaccion {
+  int64 numeroRastreo=1;
+  string tipoCuenta=2;
+  int64 banco=3;
+  double cuenta=4;
+  string tipoTransaccion=5;
+  int64 monto=6;
+  string fecha=7;
+}
+
+message HistorialResponse {
+  repeated Transaccion transacciones = 1;
+}

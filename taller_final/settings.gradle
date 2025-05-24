@@ -1,0 +1,8 @@
+rootProject.name = 'taller_final'
+
+include 'api-gateway'
+include 'auth-service'
+include 'banco-service'
+include 'cuentas-service'
+include 'transaccion-service'
+include 'transferencia-service'
