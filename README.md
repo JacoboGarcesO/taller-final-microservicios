@@ -35,3 +35,103 @@ Fecha límite de entrega: 23 de mayo de 2025 a las 11:59pm.
 - Listener de transferencias que procesará las transferencias interbancarias añadiendo un impuesto y guardando la transacción en la base de datos de transacciones.
 
 ### 5. Cobertura de pruebas igual o superior al 80%
+
+#ENDPOINTS
+
+###AUTH:
+
+POST: http://localhost:8081/api/auth/register
+BODY
+{
+"username": "bladimir",
+"password": "123456",
+"role": "ADMIN"
+}
+
+POST: http://localhost:8081/api/auth/login
+
+{
+"username": "bladimir",
+"password": "123456"
+}
+
+###CUENTAS:
+
+TRAER UNA CUENTA
+- GET: http://localhost:8082/api/cuentas
+
+TRAER UNA CUENTA POR ID
+- GET: http://localhost:8082/api/cuentas/00000000001
+
+TRAER MOVIMIENTO DE UNA CUENTA
+- GET: http://localhost:8082/api/cuentas/movimientos/00000000012
+
+
+CREAR UNA CUENTA
+- POST: http://localhost:8082/api/cuentas
+
+- BODY: {
+"accountType": "AHORROS",
+"balance": 3000000.00,
+"status": "active",
+"bankId": 1
+} 
+
+
+ACTUALIZAR UNA CUENTA
+- PUT:
+
+- http://localhost:8082/api/cuentas
+- {
+"accountNumber": "0000000005",
+"accountType": "CORRIENTE",
+"balance": 75000.00,
+"status": "active",
+"bankId": 2
+}
+
+
+#BANCOS
+
+CONSULTAR BANCOS
+- GET: http://localhost:8083/api/bank
+
+CONSULTAR UN SOLO BANCO
+- GET: http://localhost:8083/api/bank/1
+
+CREAR UN BANCO
+- POST: http://localhost:8083/api/bank
+
+- {
+  "name": "DALE",
+  "description": "Net bancos",
+  "nit": "1929831823912-1"
+  }
+
+ACTUALIZAR UN BANCO
+- PUT: http://localhost:8083/api/bank
+
+- {
+  "bankId": 20,
+  "name": "DALE",
+  "description": "BANCO EN LINEA",
+  "nit": "11111111111111-2"
+  }
+
+#TRANSFERENCIAS
+
+CONSULTAR TRANSFERENCIAS
+- GET: http://localhost:8085/api/transfer
+
+HACER TRANSFERENCIA
+- POST: http://localhost:8085/api/transfer
+- {
+  "sourceAccountId": "000000000011",
+  "destinationAccountId": "00000000001",
+  "amount": 100000
+  } 
+
+
+#API: 
+- http://localhost:8080/...
+

@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = 'https://artifactory.apps.bancolombia.com/maven-bancolombia/'
+        }
+    }
+}
+
+rootProject.name = 'taller-final-microservicios'
+
+include 'api'
+include 'auth-ms'
+include 'bank-ms'
+include 'account-ms'
+include 'transaction-ms'
+include 'transfer-ms'
